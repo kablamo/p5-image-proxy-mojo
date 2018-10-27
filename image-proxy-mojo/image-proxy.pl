@@ -21,6 +21,7 @@ $prefork->accepts(0);
 $prefork->workers(128);
 $prefork->max_clients(1);
 my $ua = Mojo::UserAgent->new(max_response_size => 10*1024*1024);
+$ua->max_redirects(10);
 
 $prefork->on(
     error => sub {
@@ -60,6 +61,11 @@ $prefork->unsubscribe('request')->on(
         $ua->get($upstream->to_string => sub {
             my ($ua, $itx) = @_;
             $DEBUG && warn 'result size: ' . $itx->res->body_size;
+
+            if ($itx->res->is_error) {
+                $prefork->emit('error', [ $tx, 'upstream error' ]);
+                return;
+            }
 
             if (!is_valid_file($itx)) {
                 $prefork->emit('error', [ $tx, 'bad mime type' ]);
