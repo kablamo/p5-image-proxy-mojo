@@ -23,7 +23,7 @@ warn $prefork->max_requests;
 $prefork->on(
     error => sub {
         my ($prefork, $err) = @_;
-#        warn 'Request failed: ' . $err->[1];
+        warn 'Request failed: ' . $err->[1];
         fail_request($err->[0]);
     }
 );
@@ -53,11 +53,11 @@ $prefork->unsubscribe('request')->on(
             return;
         }
 
-#        $DEBUG && warn 'processing request for ' . $upstream->to_string;
+        $DEBUG && warn 'processing request for ' . $upstream->to_string;
 
         $ua->get($upstream->to_string => sub {
             my ($ua, $itx) = @_;
-#            $DEBUG && warn 'result size: ' . $itx->res->body_size;
+            $DEBUG && warn 'result size: ' . $itx->res->body_size;
 
             if (!is_valid_file($itx)) {
                 $prefork->emit('error', [ $tx, 'bad mime type' ]);
@@ -80,7 +80,7 @@ sub is_valid_file {
     my $sniffer = Web::MIME::Sniffer->new_from_context('image');
     # Per https://mimesniff.spec.whatwg.org algo.
     my $detected_mime = $sniffer->detect($mime, (substr $tx->res->body, 0, 1445));
-#    $DEBUG && warn 'detected mime: ' . $detected_mime->mime_type_portion;
+    $DEBUG && warn 'detected mime: ' . $detected_mime->mime_type_portion;
 
     return 0 unless $detected_mime->mime_type_portion =~ /^image\//;
     return 1;
