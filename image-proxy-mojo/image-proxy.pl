@@ -13,13 +13,15 @@ use Web::MIME::Type;
 
 my $DEBUG = 0;
 
+# $ MOJO_MAX_MEMORY_SIZE=10485760 LIBEV_FLAGS=4 perl -Ilocal -Ivendor/lib image-proxy.pl
+
 my %blocklist = map { chomp($_); $_ => 1 } io('./blocklist.txt')->slurp;
 my $prefork = Mojo::Server::Prefork->new(listen => [ 'http://10.1.0.193:5000' ]);
 $prefork->accepts(0);
 $prefork->workers(32);
 my $ua = Mojo::UserAgent->new(max_response_size => 10*1024*1024);
-$ua->ioloop($prefork->ioloop);
-warn $prefork->max_requests;
+#$ua->ioloop($prefork->ioloop);
+
 $prefork->on(
     error => sub {
         my ($prefork, $err) = @_;

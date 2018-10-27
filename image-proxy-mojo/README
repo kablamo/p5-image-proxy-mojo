@@ -1,4 +1,4 @@
 - Uses Web::MIME::Sniffer from https://github.com/manakai/perl-web-resource.git
 - LIBEV_FLAGS=4 indicates epoll
 - Run with:
-    PERL5LIB=$PERL5LIB:./vendor/lib LIBEV_FLAGS=4 perl -Ilocal image-proxy.pl
+    MOJO_MAX_MEMORY_SIZE=10485760 LIBEV_FLAGS=4 perl -Ilocal -Ivendor/lib image-proxy.pl
