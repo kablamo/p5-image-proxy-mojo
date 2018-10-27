@@ -18,9 +18,9 @@ my $DEBUG = 0;
 my %blocklist = map { chomp($_); $_ => 1 } io('./blocklist.txt')->slurp;
 my $prefork = Mojo::Server::Prefork->new(listen => [ 'http://10.1.0.193:5000' ]);
 $prefork->accepts(0);
-$prefork->workers(32);
+$prefork->workers(128);
+$prefork->max_clients(1);
 my $ua = Mojo::UserAgent->new(max_response_size => 10*1024*1024);
-#$ua->ioloop($prefork->ioloop);
 
 $prefork->on(
     error => sub {
