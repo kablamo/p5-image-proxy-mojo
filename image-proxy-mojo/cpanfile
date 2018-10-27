@@ -1,0 +1,5 @@
+requires 'Mojolicious', '8.04';
+requires 'EV', '4.22';
+requires 'Net::DNS::Native', '0.18';
+requires 'IO::Socket::Socks', '0.74';
+requires 'IO::Socket::SSL', '2.060';

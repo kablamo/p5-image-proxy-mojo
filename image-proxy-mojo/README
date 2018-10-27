@@ -1,0 +1,4 @@
+- Uses Web::MIME::Sniffer from https://github.com/manakai/perl-web-resource.git
+- LIBEV_FLAGS=4 indicates epoll
+- Run with:
+    PERL5LIB=$PERL5LIB:./vendor/lib LIBEV_FLAGS=4 perl -Ilocal image-proxy.pl

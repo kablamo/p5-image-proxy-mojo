@@ -1,0 +1,128 @@
+=head1 NAME
+
+Web::MIME::Sniffer - MIME type sniffer
+
+=head1 SYNOPSIS
+
+  use Web::MIME::Sniffer;
+  use Web::MIME::Type;
+  my $ct = $response->get_headers_by_name ('Content-Type')->[-1];
+  my $mime = defined $ct ? Web::MIME::Type->parse_web_mime_type ($ct) : undef;
+  my $sniffer = Web::MIME::Sniffer->new_from_context ('navigate');
+  $sniffer->supported_image_types->{'image/jpeg'} = 1;
+  $sniffer->supported_image_types->{'image/png'} = 1;
+  $sniffer->supported_image_types->{'image/gif'} = 1;
+  my $computed_mime = $sniffer->detect (
+    $mime,
+    (substr $response->body, 0, 1445),
+  );
+  warn $computed_mime->mime_type_portion;
+
+=head1 DESCRIPTION
+
+The C<Web::MIME::Sniffer> class is a MIME type sniffer for Web user
+agents.  It implements the MIME sniffing algorithm of the MIME
+Sniffing Standard.
+
+=head1 METHODS
+
+There are following methods:
+
+=over 4
+
+=item $sniffer = Web::MIME::Sniffer->new_from_context ($context)
+
+Create a new instance of the sniffer.  The argument must be one of
+followings:
+
+  navigate       For a normal navigation.
+  image          For an image (e.g. fetching <img src>).
+  audio_or_video For an audio or video (e.g. fetching <video src>).
+  font           For a font (e.g. fetching Web Fonts data).
+  text_track     For a text track (e.g. fetching <track src>).
+  object         For fetching <object data>.
+
+=item $sniffer->supported_image_types->{$mime_type_portion} = $boolean
+
+Whether the application supports the MIME type as an image type or
+not.  This can affect the sniffing algorithm's result.
+
+The hash key must be a MIME type portion (type followed by a C</>
+followed by a subtype, without parameters) in lowercase, such as
+C<image/png> or C<image/jpeg>.
+
+This hash reference is empty by default.
+
+=item $sniffer->supported_audio_or_video_types->{$mime_type_portion} = $boolean
+
+Whether the application supports the MIME type as an audio or video
+type or not.  This can affect the sniffing algorithm's result.
+
+The hash key must be a MIME type portion (type followed by a C</>
+followed by a subtype, without parameters) in lowercase, such as
+C<image/png> or C<image/jpeg>.
+
+This hash reference is empty by default.
+
+=item $boolean = $sniffer->is_http
+
+=item $sniffer->is_http ($boolean)
+
+Get or set whether the response in question has been received via HTTP
+or not.  If the underlying protocol is HTTP or FTP over HTTP, this
+value should be set to true.  Otherwise, e.g. if the response is
+created from a C<data:> URL or from file system, this value should be
+set to false.  Default is false.
+
+=item $mime = $sniffer->detect ($mime, $bytes)
+
+Run the sniffing alorithm.
+
+The first argument must be a MIME type object (L<Web::MIME::Type>) or
+C<undef>.  If the resource in question is an HTTP response, the MIME
+type object created from the B<last> C<Content-Type> header value (see
+the MIME Sniffing Standard) should be specified.  If parsing of the
+header value returns C<undef>, or there is no C<Content-Type> header,
+C<undef> should be specified.
+
+The second arugment must be the resource header, i.e. first 1445 bytes
+of the response body (see the MIME Sniffing Standard for details).
+
+The method returns a MIME type object (L<Web::MIME::Type>)
+representing the computed MIME type.
+
+Please note that when the computed MIME type is different from the
+supplied MIME type (i.e. the return value is different from the first
+argument), the computed MIME type does not have parameters included in
+the supplied MIME type.  Parameters, especially the C<charset>
+parameter, should be taken from the supplied MIME type, as defined by
+the relevant specifications.
+
+=back
+
+=head1 SPECIFICATIONS
+
+MIME Sniffing Standard <https://mimesniff.spec.whatwg.org/>.
+
+HTML Standard <https://html.spec.whatwg.org/>.
+
+<track> Don't check Content-Type for <track>
+<https://www.w3.org/Bugs/Public/show_bug.cgi?id=13995>.
+
+=head1 HISTORY
+
+This module derived from the L<Whatpm::ContentType> module in the
+manakai-core package <https://github.com/wakaba/manakai>.
+
+=head1 AUTHOR
+
+Wakaba <wakaba@suikawiki.org>.
+
+=head1 LICENSE
+
+Copyright 2007-2017 Wakaba <wakaba@suikawiki.org>.
+
+This library is free software; you can redistribute it and/or modify
+it under the same terms as Perl itself.
+
+=cut

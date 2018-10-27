@@ -1,0 +1,77 @@
+=head1 NAME
+
+Web::MIME::Type::Parser - MIME type parser
+
+=head1 SYNOPSIS
+
+  use Web::MIME::Type::Parser;
+  
+  $parser = Web::MIME::Type::Parser->new;
+  $parser->onerror (sub { ... });
+  
+  $type = $parser->parse_string ($string);
+
+=head1 DESCRIPTION
+
+The C<Web::MIME::Type::Parser> class is a MIME type parser.
+
+=head1 METHODS
+
+There are following methods:
+
+=over 4
+
+=item $parser = Web::MIME::Type::Parser->new
+
+Create a new parser.
+
+=item $parser->onerror ($coderef)
+
+=item $coderef = $parser->onerror
+
+Get or set the error handler for the parser.  Any parse error, as well
+as warning and additional processing information, is reported to the
+handler.  See
+<https://github.com/manakai/data-errors/blob/master/doc/onerror.txt>
+for details of error handling.
+
+The value should not be set while the parser is running.  If the value
+is changed, the result is undefined.
+
+=item $type = $parser->parse_string ($string)
+
+Parse a character string or byte string as a MIME type and return the
+MIME type record (L<Web::MIME::Type>).  If the parsing fails, C<undef>
+is returned instead.
+
+This method is an implementation of the "parse a MIME type" steps of
+the MIME Sniffing Standard.
+
+=back
+
+=head1 SEE ALSO
+
+L<Web::MIME::Type>.
+
+=head1 SPECIFICATIONS
+
+MIME Sniffing Standard <https://mimesniff.spec.whatwg.org/>.
+
+A valid MIME type string MUST NOT have duplicate parameter names.
+
+=head1 HISTORY
+
+This module derived from L<Web::MIME::Type>.
+
+=head1 AUTHOR
+
+Wakaba <wakaba@suikawiki.org>.
+
+=head1 LICENSE
+
+Copyright 2007-2018 Wakaba <wakaba@suikawiki.org>.
+
+This library is free software; you can redistribute it and/or modify
+it under the same terms as Perl itself.
+
+=cut

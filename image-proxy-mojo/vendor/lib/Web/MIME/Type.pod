@@ -1,0 +1,230 @@
+=head1 NAME
+
+Web::MIME::Type - MIME type object
+
+=head1 SYNOPSIS
+
+  use Web::MIME::Type;
+  
+  my $type = Web::MIME::Type->parse_web_mime_type
+      ('text/CSS; charset="US-ASCII"');
+  
+  is $type->type, 'text';
+  is $type->subtype, 'css';
+  is $type->mime_type_portion, 'text/css';
+  is_deeply $type->attrs, ['charset'];
+  is $type->param ('charset'), 'US-ASCII';
+  
+  $type->param (charset => 'utf-8');
+  is $type->param ('charset'), 'utf-8';
+  
+  is $type->as_valid_mime_type, 'text/css; charset=us-ascii';
+  is $type->as_valid_mime_type_with_no_params, 'text/css';
+
+=head1 DESCRIPTION
+
+The C<Web::MIME::Type> class is used for MIME type record, which
+represents a MIME type (aka Internet Media Type) string, with or
+without parameters.
+
+Please note that, for compatibility with previous versions of this
+module, a L<Web::MIME::Type> object can represent a MIME type record
+that cannot be serialized into a valid MIME type (e.g. a MIME type
+whose subtype is the empty string).  Such MIME types are referred to
+as I<ill-formed> in this documentation.
+
+=head1 METHODS
+
+Following methods are available:
+
+=over 4
+
+=item I<$t> = Web::MIME::Type->new_from_type_and_subtype (I<$type>, I<$subtype>)
+
+Returns a new object whose type is I<$type> (string) and subtype is
+I<$subtype> (string).  I<$type> and I<$subtype> are ASCII
+case-insensitive.
+
+Please note that the result object might be I<invalid>.
+
+=item I<$type> = I<$t>->type ([I<$type>])
+
+On getting, it returns the C<type> part of the MIME type, in
+lowercase.  The C<type> part does not contain C<subtype>.
+
+On setting, it updates the C<type> part of the MIME type.  Note that
+the C<type> is ASCII case-insensitive and therefore normalized by the
+setter.
+
+Please note that the setter might make the object I<invalid>.
+
+=item I<$subtype> = I<$t>->subtype ([I<$subtype>])
+
+On getting, it returns the C<subtype> part of the MIME type, in
+lowercase.
+
+On setting, it updates the C<subtype> part of the MIME type.  Note
+that the C<subtype> is ASCII case-insensitive and therefore normalized
+by the setter.
+
+Please note that the setter might make the object I<invalid>.
+
+=item $string = $mime->mime_type_portion
+
+Return the essense (formerly known as MIME type portion) of the
+object, i.e. the "I<type>/I<subtype>" part of the MIME type (without
+parameter), in lowercase.  The result is a character string.
+
+If the object is I<invalid>, the result might not be a valid MIME
+type.
+
+=item [$string, $string, ...] = $mime->attrs
+
+Return a reference to a new array that contains the keys of the
+parameters of the object (i.e. the list of the parameter names in
+lowercase, in the order of additions).  The array items are character
+strings.
+
+=item I<$s> = I<$t>->param (I<$attr>, [I<$value>])
+
+If there is only an argument, I<$attr>, then the method returns the
+value of the C<parameter> whose C<attribute> matches to I<$attr>.
+Note that C<attribute> is ASCII case-insensitive.  If there is no such
+C<parameter>, then C<undef> is returned.
+
+Note that the object does not distinguish whether the value is
+represented as a C<token> or a C<quoted-string> in the lexical form.
+Therefore, the method never returnes enclosing C<"> characters nor
+C<\> in C<quoted-pair>.
+
+If there are two arguments, the method sets the value of the
+C<parameter> whoes C<attribute> matches to I<$attr> to I<$value>.  If
+the parameter already exists, the previous value is discarded.  Please
+note that the method might make the object I<invalid>.
+
+=item $boolean = $t->apache_bug
+
+Return whether the "check-for-apache-bug flag" [MIMESNIFF] is set or
+not.
+
+=item I<BOOL> = I<$t>->is_javascript
+
+Returns whether the type represents JavaScript or not.
+
+=item I<BOOL> = I<$t>->is_scripting_lang
+
+Returns whether the type represents a scripting language (typically
+run within the Web browser's environment), such as JavaScript.
+
+=item I<BOOL> = I<$t>->is_styling_lang
+
+Returns whether the type represents a styling language, such as CSS.
+
+=item $boolean = $t->is_image
+
+Return whether the MIME type is an image type [MIMESNIFF] or not.
+
+=item $boolean = $t->is_audio_or_video
+
+Return whether the MIME type is an audio or video type [MIMESNIFF] or
+not.
+
+=item I<BOOL> = I<$t>->is_text_based
+
+Returns whether the type represents a text-based format.
+
+=item I<BOOL> = I<$t>->is_composed_type
+
+Returns whether the C<type> is a composed type, i.e. C<message> or
+C<multipart>.
+
+=item I<BOOL> = I<$t>->is_xml_mime_type
+
+Returns whether the type is an XML MIME type according to Web
+Applications 1.0's definition.
+
+=item $string = $mime->as_valid_mime_type_with_no_params
+
+Serialize the object as a valid MIME type string with no parameters in
+lowercase.  The result is a character string.  If the object is
+I<invalid>, C<undef> is returned instead.
+
+=item $string = $mime->as_valid_mime_type
+
+Serialize the object as a valid MIME type string.  The result is a
+character string.  If the object is I<invalid>, C<undef> is returned
+instead.
+
+For non-I<invalid> case the method is an implementation of the
+"serialize a MIME type" operation of the MIME Sniffing Standard.
+
+=item I<$t>->validate (I<$onerror>, no_required_params => I<BOOL>)
+
+Performs conformance checking of the object.  It reports errors or
+wanrings such as "unregistered type error" or "private subtype
+warning" to the code reference, I<$onerror>.
+
+If the C<no_required_params> parameter is set to true, it does not
+report errors on required parameters.
+
+=back
+
+=head1 SEE ALSO
+
+L<Web::MIME::Type::Parser>.
+
+=head1 HISTORY
+
+This module derived from the L<Message::MIME::Type> module in the
+manakai-core package <https://github.com/wakaba/manakai>.
+
+Part of this module is originally contained in the
+L<Whatpm::IMTChecker> module.  The L<Whatpm::IMTChecker> module is
+obsolete and removed from the manakai package in favor of the
+L<Message::MIME::Type> module.
+
+=head1 SPECIFICATIONS
+
+=over 4
+
+=item MIME
+
+RFC 2048, Multipurpose Internet Mail Extensions (MIME) Part Two: Media
+Types <https://tools.ietf.org/html/rfc2046>.
+
+=item HTTP
+
+RFC 7230, Hypertext Transfer Protocol (HTTP/1.1): Message Syntax and
+Routing <https://tools.ietf.org/html/rfc7230>.
+
+=item MIMESNIFF
+
+MIME Sniffing Standard <https://mimesniff.spec.whatwg.org/>.
+
+=item MTREG
+
+RFC 4288, Media Type Specifications and Registration Procedures
+<https://tools.ietf.org/html/rfc4288>.
+
+=item XMLMT
+
+RFC 7303, XML Media Types <https://tools.ietf.org/html/rfc7303>.
+
+=item IANAREG
+
+MIME Media Types <https://www.iana.org/assignments/media-types/>.
+
+=back
+
+=head1 AUTHOR
+
+Wakaba <wakaba@suikawiki.org>.
+
+=head1 LICENSE
+
+Copyright 2007-2018 Wakaba <wakaba@suikawiki.org>.
+
+This library is free software; you can redistribute it and/or modify
+it under the same terms as Perl itself.
+
+=cut
